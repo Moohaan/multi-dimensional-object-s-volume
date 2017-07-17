@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- this is to use online libraries to plot graphs and to some css styles-->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script></head>
+<!-- BODY-->
+    <body> 
+        <style>
+        body{
+            background-color: #DFE2DB;
+        }
+        .Content{
+            text-align: center;
+            margin: 4% 0;
+   
+        }
+        #cont >div{
+            margin-left: -10px;
+            display: inline-block;
+            text-align: center;
+            width: 25%;
+
+        }
+        #error{
+          margin: 1%;
+        }
+        footer p{
+            margin-top: 5%;
+            top: 5%;
+        }
+        #myCanvas1,#myCanvas2,#myCanvas3,#myCanvas4 {
+          /* defines the dimensions for the graphs*/
+            width: 400px;
+            height: 400px;
+            margin-left: 0.1%;
+            margin-top: 1%;
+        }
+        #googleForm{
+            margin-top: 3%;
+        }
+        #myCanvas{
+          display: none;
+        }
+        </style>
+
+        <div class="Content">
+                <div id="cont">
+                    <div>
+                  <input type="button" value="10's power 3 Trails" id="three" />
+                  <div id="myCanvas1"><!-- graph 1--></div>
+                  </div>
+                  <div>
+                  <input type="button" value="10's power 4 Trails" id="four" />
+                  <div id="myCanvas2"><!-- graph 2--></div>
+                  </div>
+                  <div>
+                  <input type="button" value="10's power 5 Trails" id="five" />
+                  <div id="myCanvas3"><!-- graph 3--></div>
+                  </div>
+                  <div>
+                  <input type="button" value="10's power 6 Trails" id = "six" />
+                  <div id="myCanvas4"><!-- graph 4--></div>
+                  </div>
+                </div>
+                <!-- footer-->
+            <footer class ='footer col-sm-12' >
+            <p>2013PH10851 Mohan Lal</p>
+        </footer>
+            
+        </div>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+        <script>
+            $(function() {
+                $('#numberOfDimentions').keyup(function() {
+                    set(this);
+                });
+                $("#three").click(function() {
+                  //when button with 10's power 3 is pressed
+                  VOLvsDim (Math.pow(10,3), 1);
+                });
+                $('#four').click(function() {
+                  //when button with 10's power 4 is pressed
+                  VOLvsDim (Math.pow(10,4), 2);
+                });
+                $('#five').click(function() {
+                  //when button with 10's power 5 is pressed
+                  VOLvsDim (Math.pow(10,5), 3);
+                });
+                $('#six').click(function() {
+                  //when button with 10's power 6 is pressed
+                  VOLvsDim (Math.pow(10,6), 4);
+                });
+            }); 
+          var Dim = 0;
+            function set (a) {
+              Dim = a.value;
+            }
+            function eval (x,D) {
+              // this fuction calculate the value of the equation of the D-dimensional ellipsoid at point x.
+              var vol = x[0]*x[0];
+              for (var i = 1; i < D; i++) {
+                vol = vol + 4*x[i]*x[i];
+              };
+                return vol;
+            }
+
+            function gamma (n) {
+        // This is gamma function calculator   
+              if (n==1) {
+                return 1;
+              }
+              if (n == 1/2){
+                return Math.sqrt(Math.PI);
+              }
+              else  {
+                return (n-1)*gamma(n-1);
+              };
+            }
+            function forVolume (n) {
+              // calculates and returns the volume of n-dimensional ellipsoid
+              return ((2/n)*Math.pow(1/2, n-1)*Math.pow(Math.PI, n/2))/gamma(n/2);
+            }
+
+            function Volume (D,N) {
+              // this functon calculates the volume is D-dimensional ellipsoid in N trails
+              var insidePoints = 0; // number of points liying in ellipsoid 
+                var points = new Array(); // array of points randomly generated in the box
+                for (var j = 0; j < N; j++) {
+                  for (var i = 0; i < D; i++) {
+                      if (i==0) { 
+                      points[i] = Math.random() * (1 - (-1)) + (-1);} 
+                      else{
+                      points[i] = Math.random() * (0.5 - (-0.5)) + (-0.5);
+                      };
+                    };
+                      if (eval(points,D)<=1) { // this consition checks if D-dimentional point lies within the ellipsoid or not. If it does then increases "insidePoints" by 1.
+                            insidePoints++;
+                        };
+                };
+                return  (2*insidePoints)/N; // returns the volume calculated by monte carlo
+            }
+
+            function VOLvsDim (N, n) {
+              var vols = new Array(); // array of volumes calculated by monte carlo methos
+              var VOLS = new Array(); // array of volumes calculated by formula
+              var Dims = new Array(); // array of dimentions from 2 to 10
+             
+              for (var i = 2; i<10; i++) {
+              // it just add values in those arrays
+                VOLS[i-2] = forVolume(i)
+                vols[i-2] = Volume(i,N);
+                Dims[i-2] = i;
+              };
+
+// below is just plotting os graphs
+              var trace1 = {
+                    x: Dims, 
+                    y: vols, 
+                    type: 'scatter',
+                    name: 'By Monte carlo'
+                  };
+              var trace2 = {
+                    x: Dims, 
+                    y: VOLS, 
+                    type: 'scatter',
+                    name: 'By formula'
+                  };
+              var layout = {
+                    xaxis: {
+                      title: 'Dimentions'
+                    },
+                    yaxis: {
+                      title: 'Volume of ellipsoid',
+                    },
+                    margin: {
+                      t: 100
+                    },
+                    title:'Volume vs Dimentions'
+                  };
+              var data = [trace1,trace2];
+                  Plotly.newPlot('myCanvas'+n+'', data, layout);
+            }
+
+
+        </script>  
+          </body>
+
+</html>
